@@ -1,36 +1,51 @@
 package ru.omsk.metro.net;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
 
 /**
  * Created by avesloguzova on 05.11.14.
  */
 public class LoadResult {
-    private boolean success;
-    private JSONObject object;
 
+    @Nullable
+    private final JSONObject json;
+    @Nullable
+    private final String exceptMessage;
+
+    private LoadResult(@Nullable JSONObject json, @Nullable String exceptMessage) {
+        this.json = json;
+        this.exceptMessage = exceptMessage;
+    }
+
+    public LoadResult(@NotNull JSONObject json) {
+        this(json, null);
+    }
+
+    public LoadResult(@NotNull String exceptMessage) {
+        this(null, exceptMessage);
+    }
+
+    @Nullable
+    public JSONObject getJSON() {
+        return json;
+    }
+
+    @Nullable
     public String getExceptMessage() {
         return exceptMessage;
     }
 
-    private String exceptMessage;
-
-    public boolean isSuccess() {
-        return success;
+    public boolean isSucceeded() {
+        return json != null;
     }
 
-    public JSONObject getObject() {
-        return object;
-    }
-
-    public LoadResult(boolean success, String exceptMessage) {
-        this.success=false;
-
-    }
-
-    public LoadResult(JSONObject object) {
-        this.object = object;
-        this.success = true;
-
+    @Override
+    public String toString() {
+        return "LoadResult{" +
+                "json=" + json +
+                ", exceptMessage='" + exceptMessage + '\'' +
+                '}';
     }
 }
