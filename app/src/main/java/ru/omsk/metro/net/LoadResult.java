@@ -1,4 +1,4 @@
-package ru.omsk.metro;
+package ru.omsk.metro.net;
 
 import org.json.simple.JSONObject;
 

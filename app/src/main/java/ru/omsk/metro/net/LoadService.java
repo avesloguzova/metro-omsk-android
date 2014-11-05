@@ -1,4 +1,4 @@
-package ru.omsk.metro;
+package ru.omsk.metro.net;
 
 import android.content.Context;
 
@@ -18,6 +18,8 @@ import java.net.URL;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import ru.omsk.metro.R;
 
 /**
  * Created by avesloguzova on 05.11.14.

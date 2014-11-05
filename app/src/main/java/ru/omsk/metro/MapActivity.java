@@ -6,12 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import org.json.simple.JSONObject;
-
+import ru.omsk.metro.net.LoadResult;
+import ru.omsk.metro.net.LoadService;
+import ru.omsk.metro.net.LoadServiceException;
 
 public class MapActivity extends Activity {
 
