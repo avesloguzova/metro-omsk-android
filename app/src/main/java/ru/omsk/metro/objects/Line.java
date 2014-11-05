@@ -41,16 +41,15 @@ public class Line extends NamedSubwayObject {
     }
 
     @NotNull
-    public static Line fromJSON(@NotNull JSONObject jsonLine) {
-        Long color = (Long) jsonLine.get("color");
-
-        JSONArray stationsArray = (JSONArray) jsonLine.get("stations");
+    public static Line fromJSON(@NotNull JSONObject lineObject) {
+        JSONArray stationsArray = (JSONArray) lineObject.get("stations");
 
         List<Station> stations = new ArrayList<Station>();
         for (Object stationObject : stationsArray) {
             stations.add(Station.fromJSON((JSONObject) stationObject));
         }
 
-        return new Line(getIdFromJSON(jsonLine), getNameFromJSON(jsonLine), color.intValue(), stations);
+        return new Line(getIdFromJSON(lineObject), getNameFromJSON(lineObject),
+                ((Long) lineObject.get("color")).intValue(), stations);
     }
 }

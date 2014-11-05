@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 import ru.omsk.metro.net.LoadResult;
 import ru.omsk.metro.net.LoadService;
 import ru.omsk.metro.net.LoadServiceException;
@@ -53,9 +55,10 @@ public class MapActivity extends Activity {
         new LoadServiceGateway(this).execute();
     }
     private class LoadServiceGateway extends AsyncTask<Void, Void,LoadResult> {
-        private Context context;
+        @NotNull
+        private final Context context;
 
-        private LoadServiceGateway(Context context) {
+        private LoadServiceGateway(@NotNull Context context) {
             this.context = context;
         }
 
@@ -64,12 +67,12 @@ public class MapActivity extends Activity {
             try {
                 return new LoadService(context).load();
             } catch (LoadServiceException e) {
-                return new LoadResult(false,e.getMessage());
+                return new LoadResult(e.getMessage());
             }
         }
         @Override
-        protected void onPostExecute(LoadResult result) {
-            if (!result.isSuccess()) {
+        protected void onPostExecute(@NotNull LoadResult result) {
+            if (!result.isSucceeded()) {
                 Toast.makeText(context, result.getExceptMessage(), Toast.LENGTH_LONG).show();
             } else {
                 processLoadResult(result);

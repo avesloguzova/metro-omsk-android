@@ -26,5 +26,13 @@
             }
             ]
         }
+    ],
+    "wayStations": [
+        {
+            "id": 1, "idFrom": 2, "idTo": 4, "wayTime": 50
+        },
+        {
+            "id": 2, "idFrom": 4, "idTo: 2, "wayTime": 180
+        }
     ]
 }

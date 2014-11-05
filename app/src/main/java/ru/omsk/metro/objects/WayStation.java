@@ -1,6 +1,7 @@
 package ru.omsk.metro.objects;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONObject;
 
 /**
  * @author adkozlov
@@ -39,5 +40,17 @@ public class WayStation extends AbstractSubwayObject {
 
     public int getWayTimeInSeconds() {
         return wayTime.getSeconds();
+    }
+
+    @NotNull
+    public static WayStation fromJSON(@NotNull JSONObject wayStationObject) {
+        return new WayStation(getIdFromJSON(wayStationObject),
+                getIdFromJSON(wayStationObject, "idFrom"), getIdFromJSON(wayStationObject, "idTo"),
+                Time.fromJSON(wayStationObject, "wayTime"));
+    }
+
+    @NotNull
+    public static int getIdFromJSON(@NotNull JSONObject wayStationObject, @NotNull String idProperty) {
+        return ((Long) wayStationObject.get(idProperty)).intValue();
     }
 }
