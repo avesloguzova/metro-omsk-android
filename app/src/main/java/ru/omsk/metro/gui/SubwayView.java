@@ -15,7 +15,6 @@ import java.util.Iterator;
 
 import ru.omsk.metro.model.Line;
 import ru.omsk.metro.model.Station;
-import ru.omsk.metro.model.StationCoordinate;
 import ru.omsk.metro.model.SubwayMap;
 
 /**
@@ -28,8 +27,6 @@ public class SubwayView extends View {
 
     @NotNull
     private final Bitmap bitmap;
-    @NotNull
-    private final Canvas canvas;
 
     @NotNull
     private final Paint paint;
@@ -50,20 +47,17 @@ public class SubwayView extends View {
         pxHeight = dpToPx(dpHeight);
 
         bitmap = Bitmap.createBitmap(pxHeight, pxWidth, Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(bitmap);
         bitmapPaint = new Paint(Paint.DITHER_FLAG);
 
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setDither(true);
-        paint.setColor(0xffff0505);
         paint.setStrokeWidth(5f);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
-        canvas.drawLine(0, 0, pxWidth, pxHeight, paint);
-        canvas.drawLine(pxWidth, 0, pxHeight, 0, paint);
+        setWillNotDraw(false);
     }
 
     @NotNull
@@ -73,11 +67,17 @@ public class SubwayView extends View {
 
     public void setMap(@NotNull SubwayMap map) {
         this.map = map;
+
+        invalidate();
     }
 
-    public void drawMap() {
+    public void drawMap(@NotNull Canvas canvas) {
+        if (map == null) {
+            return;
+        }
+
         for (Line line : map.getLines()) {
-            paint.setColor(line.getColor());
+            paint.setColor(line.getColor() | 0xFF000000);
 
             Iterator<Station> iterator = line.getStations().iterator();
 
@@ -92,21 +92,20 @@ public class SubwayView extends View {
     }
 
     private VertexCoordinate nextCoordinate(Iterator<Station> iterator) {
-        StationCoordinate[] boundingRectangle = map.getBoundingRectangle();
-        double scaleX = boundingRectangle[1].getX() - boundingRectangle[0].getX();
-        double scaleY = boundingRectangle[1].getY() - boundingRectangle[0].getY();
-
-        double offsetX = boundingRectangle[0].getX();
-        double offsetY = boundingRectangle[0].getY();
+//        StationCoordinate[] boundingRectangle = map.getBoundingRectangle();
+//        double scaleX = boundingRectangle[1].getX() - boundingRectangle[0].getX();
+//        double scaleY = boundingRectangle[1].getY() - boundingRectangle[0].getY();
+//
+//        double offsetX = boundingRectangle[0].getX();
+//        double offsetY = boundingRectangle[0].getY();
 
         return VertexCoordinate.createFromStationCoordinate(iterator.next().getCoordinate(),
-                offsetX, offsetY,
-                scaleX, scaleY,
                 pxWidth, pxHeight);
     }
 
     @Override
     protected void onDraw(@NotNull Canvas canvas) {
+        drawMap(canvas);
         canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
     }
 

@@ -35,12 +35,10 @@ public class VertexCoordinate {
 
     @NotNull
     public static VertexCoordinate createFromStationCoordinate(@NotNull StationCoordinate coordinate,
-                                                               double offsetX, double offsetY,
-                                                               double scaleX, double scaleY,
                                                                int width, int height) {
-        int x = (int) ((coordinate.getX() - offsetX) / scaleX * width * 0.8);
-        int y = (int) ((coordinate.getY() - offsetY) / scaleY * height * 0.8);
+        int x = (int) (coordinate.getX() * width * 0.8 + width * 0.1);
+        int y = (int) ((height + width) / 2 - height * 0.1 - coordinate.getY() * height * 0.8);
 
-        return new VertexCoordinate((int) (0.1 * width + x), (int) (0.1 * height + height - y));
+        return new VertexCoordinate(x, y);
     }
 }

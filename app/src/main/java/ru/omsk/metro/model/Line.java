@@ -49,7 +49,9 @@ public class Line extends NamedSubwayObject {
             stations.add(Station.fromJSON((JSONObject) stationObject));
         }
 
+        String color = ((String) lineObject.get("color")).replace("#", "");
+
         return new Line(getIdFromJSON(lineObject), getNameFromJSON(lineObject),
-                ((Long) lineObject.get("color")).intValue(), stations);
+                Integer.parseInt(color, 16), stations);
     }
 }

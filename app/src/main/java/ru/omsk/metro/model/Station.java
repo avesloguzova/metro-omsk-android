@@ -62,6 +62,6 @@ public class Station extends NamedSubwayObject {
     public static Station fromJSON(@NotNull JSONObject stationObject) {
         return new Station(getIdFromJSON(stationObject), getNameFromJSON(stationObject),
                 StationCoordinate.fromJSON(stationObject),
-                Time.fromJSON(stationObject, "toPrev"), Time.fromJSON(stationObject, "toNext"));
+                Time.fromJSON(stationObject, "prev_time"), Time.fromJSON(stationObject, "next_time"));
     }
 }

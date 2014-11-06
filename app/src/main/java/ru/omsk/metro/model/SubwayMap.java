@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author adkozlov
  */
-public class SubwayMap {
+public class SubwayMap extends NamedSubwayObject {
 
     private final static Comparator<StationCoordinate> X_COMPARATOR = new Comparator<StationCoordinate>() {
         @Override
@@ -36,7 +36,9 @@ public class SubwayMap {
     @NotNull
     private final StationCoordinate[] boundingRectangle;
 
-    public SubwayMap(@NotNull List<Line> lines, @NotNull List<WayStation> wayStations) {
+    public SubwayMap(@NotNull int id, @NotNull String name, @NotNull List<Line> lines, @NotNull List<WayStation> wayStations) {
+        super(id, name);
+
         this.lines = lines;
         this.wayStations = wayStations;
 
@@ -83,7 +85,9 @@ public class SubwayMap {
 
     @NotNull
     public static SubwayMap fromJSON(@NotNull JSONObject mapObject) {
-        return new SubwayMap(getLinesFromJSON(mapObject), null /*getWayStationsFromJSON(mapObject)*/);
+        ;
+        return new SubwayMap(((Long) mapObject.get("city_id")).intValue(), getNameFromJSON(mapObject),
+                getLinesFromJSON(mapObject), getWayStationsFromJSON(mapObject));
     }
 
     @NotNull
@@ -99,7 +103,7 @@ public class SubwayMap {
 
     @NotNull
     private static List<WayStation> getWayStationsFromJSON(@NotNull JSONObject mapObject) {
-        JSONArray wayStations = (JSONArray) mapObject.get("wayStations");
+        JSONArray wayStations = (JSONArray) mapObject.get("transitions");
 
         List<WayStation> result = new ArrayList<WayStation>();
         for (Object wayStationObject : wayStations) {
