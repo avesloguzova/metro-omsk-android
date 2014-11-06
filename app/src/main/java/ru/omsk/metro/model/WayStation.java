@@ -44,9 +44,8 @@ public class WayStation extends AbstractSubwayObject {
 
     @NotNull
     public static WayStation fromJSON(@NotNull JSONObject wayStationObject) {
-        return new WayStation(getIdFromJSON(wayStationObject),
-                getIdFromJSON(wayStationObject, "idFrom"), getIdFromJSON(wayStationObject, "idTo"),
-                Time.fromJSON(wayStationObject, "wayTime"));
+        return new WayStation(0, getIdFromJSON(wayStationObject, "from_id"), getIdFromJSON(wayStationObject, "to_id"),
+                Time.fromJSON(wayStationObject, "time"));
     }
 
     @NotNull

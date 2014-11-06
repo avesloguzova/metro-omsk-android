@@ -37,7 +37,7 @@ public class VertexCoordinate {
     public static VertexCoordinate createFromStationCoordinate(@NotNull StationCoordinate coordinate,
                                                                int width, int height) {
         int x = (int) (coordinate.getX() * width * 0.8 + width * 0.1);
-        int y = (int) ((height + width) / 2 - height * 0.1 - coordinate.getY() * height * 0.8);
+        int y = (int) ((height + width) / 2 - width * 0.1 - coordinate.getY() * width * 0.8);
 
         return new VertexCoordinate(x, y);
     }

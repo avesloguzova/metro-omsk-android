@@ -53,7 +53,7 @@ public class SubwayView extends View {
         paint.setAntiAlias(true);
         paint.setDither(true);
         paint.setStrokeWidth(5f);
-        paint.setStyle(Paint.Style.STROKE);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
@@ -82,23 +82,25 @@ public class SubwayView extends View {
             Iterator<Station> iterator = line.getStations().iterator();
 
             VertexCoordinate current = nextCoordinate(iterator);
+            drawCircle(canvas, current);
+
             while (iterator.hasNext()) {
                 VertexCoordinate previous = current;
+
                 current = nextCoordinate(iterator);
+                drawCircle(canvas, current);
 
                 canvas.drawLine(previous.getX(), previous.getY(), current.getX(), current.getY(), paint);
             }
         }
     }
 
-    private VertexCoordinate nextCoordinate(Iterator<Station> iterator) {
-//        StationCoordinate[] boundingRectangle = map.getBoundingRectangle();
-//        double scaleX = boundingRectangle[1].getX() - boundingRectangle[0].getX();
-//        double scaleY = boundingRectangle[1].getY() - boundingRectangle[0].getY();
-//
-//        double offsetX = boundingRectangle[0].getX();
-//        double offsetY = boundingRectangle[0].getY();
+    private void drawCircle(@NotNull Canvas canvas, @NotNull VertexCoordinate current) {
+        float radius = 10;
+        canvas.drawCircle(current.getX(), current.getY(), radius, paint);
+    }
 
+    private VertexCoordinate nextCoordinate(Iterator<Station> iterator) {
         return VertexCoordinate.createFromStationCoordinate(iterator.next().getCoordinate(),
                 pxWidth, pxHeight);
     }
