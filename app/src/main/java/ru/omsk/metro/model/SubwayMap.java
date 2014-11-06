@@ -68,9 +68,6 @@ public class SubwayMap {
 
     @NotNull
     private static StationCoordinate[] createBoundingRectangle(@NotNull List<Line> lines) {
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-
         List<StationCoordinate> coordinates = new ArrayList<StationCoordinate>();
         for (Line line : lines) {
             for (Station station : line.getStations()) {

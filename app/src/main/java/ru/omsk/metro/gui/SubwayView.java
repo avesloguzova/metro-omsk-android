@@ -97,7 +97,7 @@ public class SubwayView extends View {
         double scaleY = boundingRectangle[1].getY() - boundingRectangle[0].getY();
 
         double offsetX = boundingRectangle[0].getX();
-        double offsetY = boundingRectangle[1].getY();
+        double offsetY = boundingRectangle[0].getY();
 
         return VertexCoordinate.createFromStationCoordinate(iterator.next().getCoordinate(),
                 offsetX, offsetY,

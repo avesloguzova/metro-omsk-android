@@ -62,6 +62,7 @@ public class MapActivity extends Activity {
 
             view.setMap(SubwayMap.fromJSON(result.getJSON()));
             view.drawMap();
+            view.invalidate();
         }
     }
     public void loadDataProcess() {
