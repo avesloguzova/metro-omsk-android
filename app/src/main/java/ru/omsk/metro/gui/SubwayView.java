@@ -7,23 +7,32 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import ru.omsk.metro.model.Line;
 import ru.omsk.metro.model.Station;
 import ru.omsk.metro.model.SubwayMap;
+import ru.omsk.metro.paths_search.Graph;
 
 /**
  * Created by adkozlov on 06.11.14.
  */
 public class SubwayView extends View {
 
+    private static final int SELECTED_VERTEX_ALPHA = 0x88;
+    private static final int COLOR_MASK = 0xFF000000;
+
     private final int pxWidth;
     private final int pxHeight;
+    private final float radius = 10;
 
     @NotNull
     private final Bitmap bitmap;
@@ -35,6 +44,14 @@ public class SubwayView extends View {
 
     @NotNull
     private SubwayMap map;
+    @NotNull
+    private Graph graph;
+
+    private int fromId = -1;
+    private int toId = -1;
+
+    @NotNull
+    private final Set<VertexCoordinate> vertices = new HashSet<VertexCoordinate>();
 
     public SubwayView(@NotNull Context context, @NotNull AttributeSet attrs) {
         super(context, attrs);
@@ -58,6 +75,52 @@ public class SubwayView extends View {
         paint.setStrokeCap(Paint.Cap.ROUND);
 
         setWillNotDraw(false);
+
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (graph == null) {
+                    return false;
+                }
+
+                float x = motionEvent.getX();
+                float y = motionEvent.getY();
+
+                switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    VertexCoordinate coordinate = vertexIsTouched(x, y);
+
+                    if (coordinate != null) {
+                        if (fromId == -1) {
+                            fromId = coordinate.getId();
+                        } else if (toId == -1) {
+                            toId = coordinate.getId();
+                        }
+
+                        invalidate();
+                    }
+
+                    break;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Nullable
+    private VertexCoordinate vertexIsTouched(float x, float y) {
+        for (VertexCoordinate coordinate : vertices) {
+            if  (isInCircle(x, coordinate.getX()) && isInCircle(y, coordinate.getY())) {
+                return coordinate;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isInCircle(float x, float center) {
+        return center - radius <= x && x <= center + radius;
     }
 
     @NotNull
@@ -68,6 +131,7 @@ public class SubwayView extends View {
     public void setMap(@NotNull SubwayMap map) {
         this.map = map;
 
+        graph = new Graph(map);
         invalidate();
     }
 
@@ -77,7 +141,7 @@ public class SubwayView extends View {
         }
 
         for (Line line : map.getLines()) {
-            paint.setColor(line.getColor() | 0xFF000000);
+            paint.setColor(line.getColor() | COLOR_MASK);
 
             Iterator<Station> iterator = line.getStations().iterator();
 
@@ -96,13 +160,24 @@ public class SubwayView extends View {
     }
 
     private void drawCircle(@NotNull Canvas canvas, @NotNull VertexCoordinate current) {
-        float radius = 10;
+        int oldAlpha = paint.getAlpha();
+        if (current.getId() == fromId || current.getX() == toId) {
+            paint.setAlpha(SELECTED_VERTEX_ALPHA);
+        }
+
         canvas.drawCircle(current.getX(), current.getY(), radius, paint);
+        paint.setAlpha(oldAlpha);
     }
 
+    @NotNull
     private VertexCoordinate nextCoordinate(Iterator<Station> iterator) {
-        return VertexCoordinate.createFromStationCoordinate(iterator.next().getCoordinate(),
+        Station station = iterator.next();
+
+        VertexCoordinate result =  VertexCoordinate.createFromStationCoordinate(station.getId(), station.getCoordinate(),
                 pxWidth, pxHeight);
+        vertices.add(result);
+
+        return result;
     }
 
     @Override
