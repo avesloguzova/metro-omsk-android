@@ -8,16 +8,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+
 import org.jetbrains.annotations.NotNull;
+
 
 import ru.omsk.metro.gui.SubwayView;
 import ru.omsk.metro.model.SubwayMap;
+
+import java.util.List;
+
+
 import ru.omsk.metro.net.LoadResult;
 import ru.omsk.metro.net.LoadServiceException;
+
 import ru.omsk.metro.net.MockLoadService;
 
-public class MapActivity extends Activity {
 
+public class MapActivity extends Activity {
+   
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

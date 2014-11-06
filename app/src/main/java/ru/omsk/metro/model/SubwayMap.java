@@ -97,7 +97,6 @@ public class SubwayMap {
         for (Object lineObject : lines) {
             result.add(Line.fromJSON((JSONObject) lineObject));
         }
-
         return result;
     }
 
@@ -109,7 +108,6 @@ public class SubwayMap {
         for (Object wayStationObject : wayStations) {
             result.add(WayStation.fromJSON((JSONObject) wayStationObject));
         }
-
         return result;
     }
 }
