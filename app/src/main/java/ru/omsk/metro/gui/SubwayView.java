@@ -27,7 +27,7 @@ import ru.omsk.metro.paths_search.Graph;
  */
 public class SubwayView extends View {
 
-    private static final int SELECTED_VERTEX_ALPHA = 0x88;
+    private static final int SELECTED_VERTEX_ALPHA = 0x48;
     private static final int COLOR_MASK = 0xFF000000;
 
     private final int pxWidth;
@@ -95,6 +95,9 @@ public class SubwayView extends View {
                             fromId = coordinate.getId();
                         } else if (toId == -1) {
                             toId = coordinate.getId();
+                        } else {
+                            fromId = coordinate.getId();
+                            toId = -1;
                         }
 
                         invalidate();
@@ -161,7 +164,7 @@ public class SubwayView extends View {
 
     private void drawCircle(@NotNull Canvas canvas, @NotNull VertexCoordinate current) {
         int oldAlpha = paint.getAlpha();
-        if (current.getId() == fromId || current.getX() == toId) {
+        if (current.getId() == fromId || current.getId() == toId) {
             paint.setAlpha(SELECTED_VERTEX_ALPHA);
         }
 
