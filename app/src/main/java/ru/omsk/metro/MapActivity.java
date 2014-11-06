@@ -10,9 +10,11 @@ import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
+import ru.omsk.metro.gui.SubwayView;
+import ru.omsk.metro.model.SubwayMap;
 import ru.omsk.metro.net.LoadResult;
-import ru.omsk.metro.net.LoadService;
 import ru.omsk.metro.net.LoadServiceException;
+import ru.omsk.metro.net.MockLoadService;
 
 public class MapActivity extends Activity {
 
@@ -45,16 +47,23 @@ public class MapActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-    private void processLoadResult(LoadResult result){
 
+    private void processLoadResult(@NotNull LoadResult result) {
+        if (result.isSucceeded()) {
+            SubwayView view = (SubwayView) findViewById(R.id.subwayView);
 
+            view.setMap(SubwayMap.fromJSON(result.getJSON()));
+            view.drawMap();
+        }
     }
     public void loadDataProcess() {
         //TODO progress bar
 
         new LoadServiceGateway(this).execute();
     }
-    private class LoadServiceGateway extends AsyncTask<Void, Void,LoadResult> {
+
+    private class LoadServiceGateway extends AsyncTask<Void, Void, LoadResult> {
+
         @NotNull
         private final Context context;
 
@@ -65,7 +74,7 @@ public class MapActivity extends Activity {
         @Override
         protected LoadResult doInBackground(Void... voids) {
             try {
-                return new LoadService(context).load();
+                return new MockLoadService(context).load();
             } catch (LoadServiceException e) {
                 return new LoadResult(e.getMessage());
             }

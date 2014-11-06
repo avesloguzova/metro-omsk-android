@@ -1,4 +1,4 @@
-package ru.omsk.metro.objects;
+package ru.omsk.metro.model;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
