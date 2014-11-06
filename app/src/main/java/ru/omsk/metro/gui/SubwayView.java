@@ -62,8 +62,8 @@ public class SubwayView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
-//        canvas.drawLine(0, 0, pxWidth, pxHeight, paint);
-//        canvas.drawLine(pxWidth, 0, pxHeight, 0, paint);
+        canvas.drawLine(0, 0, pxWidth, pxHeight, paint);
+        canvas.drawLine(pxWidth, 0, pxHeight, 0, paint);
     }
 
     @NotNull

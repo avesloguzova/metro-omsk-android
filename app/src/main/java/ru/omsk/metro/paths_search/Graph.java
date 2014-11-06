@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import ru.omsk.metro.objects.Line;
-import ru.omsk.metro.objects.Station;
-import ru.omsk.metro.objects.TimeInfinity;
-import ru.omsk.metro.objects.WayStation;
+import ru.omsk.metro.model.Line;
+import ru.omsk.metro.model.Station;
+import ru.omsk.metro.model.TimeInfinity;
+import ru.omsk.metro.model.WayStation;
 
 /**
  * Created by avesloguzova on 05.11.14.
