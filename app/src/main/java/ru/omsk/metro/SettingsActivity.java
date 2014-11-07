@@ -19,15 +19,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import ru.omsk.metro.model.City;
 import ru.omsk.metro.net.LoadResult;
-import ru.omsk.metro.net.LoadService;
 import ru.omsk.metro.net.LoadServiceException;
 import ru.omsk.metro.net.MockLoadService;
-
 
 public class SettingsActivity extends Activity {
 

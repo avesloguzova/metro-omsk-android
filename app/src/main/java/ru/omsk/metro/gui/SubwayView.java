@@ -206,7 +206,7 @@ public class SubwayView extends View {
 
             Paint.Style oldStyle = mapPaint.getStyle();
             mapPaint.setStyle(Paint.Style.STROKE);
-            mapPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+            mapPaint.setPathEffect(new DashPathEffect(new float[] {5, 20}, 0));
 
             Vertex from = findVertexById(wayStation.getIdFrom());
             Vertex to = findVertexById(wayStation.getIdTo());
