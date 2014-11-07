@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import ru.omsk.metro.gui.SubwayView;
 import ru.omsk.metro.model.SubwayMap;
 import ru.omsk.metro.net.LoadResult;
-import ru.omsk.metro.net.LoadService;
 import ru.omsk.metro.net.LoadServiceException;
+import ru.omsk.metro.net.MockLoadService;
 
 public class MapActivity extends Activity {
    
@@ -73,7 +73,7 @@ public class MapActivity extends Activity {
         @Override
         protected LoadResult doInBackground(Void... voids) {
             try {
-                return new LoadService(context).load();
+                return new MockLoadService(context).load();
             } catch (LoadServiceException e) {
                 return new LoadResult(e.getMessage());
             }
