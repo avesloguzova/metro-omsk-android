@@ -149,7 +149,7 @@ public class SubwayView extends View {
         return null;
     }
 
-    @NotNull
+    @Nullable
     private Vertex findVertexById(int id) {
         for (Vertex vertex : vertices) {
             if (vertex.getId() == id) {
@@ -157,12 +157,14 @@ public class SubwayView extends View {
             }
         }
 
-        throw new RuntimeException("no such station found");
+        return null;
     }
 
-    @NotNull
+    @Nullable
     private String findVertexNameById(int id) {
-        return findVertexById(id).getName();
+        Vertex vertex = findVertexById(id);
+
+        return vertex != null ? findVertexById(id).getName() : null;
     }
 
     private boolean isInCircle(float x, float center) {
