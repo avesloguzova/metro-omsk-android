@@ -100,8 +100,7 @@ public class LoadService {
         try {
             return new URL(
                     context.getString(R.string.API_PROTOCOL),
-                    context.getString(R.string.API_HOST),
-                    Integer.valueOf(context.getString(R.string.API_PORT)), path
+                    context.getString(R.string.API_HOST), path
             ).toURI();
         } catch (MalformedURLException e) {
             throw new LoadServiceException(e);

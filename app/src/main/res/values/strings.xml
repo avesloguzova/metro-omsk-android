@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="API_PROTOCOL">http</string>
     <string name="API_HOST">floating-oasis-2420.herokuapp.com</string>
-    <string name="API_PORT">80</string>
+    <string name="API_PORT"></string>
     <string name="API_PATH_MODEL">backend/%d</string>
     <string name="API_PATH_CITY">backend</string>
     <string name="title_activity_settings">Settings</string>
