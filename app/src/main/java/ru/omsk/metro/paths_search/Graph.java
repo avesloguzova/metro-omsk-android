@@ -11,7 +11,6 @@ import java.util.List;
 import ru.omsk.metro.model.Line;
 import ru.omsk.metro.model.Station;
 import ru.omsk.metro.model.SubwayMap;
-import ru.omsk.metro.model.TimeInfinity;
 import ru.omsk.metro.model.WayStation;
 
 /**
@@ -33,9 +32,9 @@ public class Graph {
             for (Station station : line.getStations()) {
                 Vertex v = new Vertex(station.getId());
                 vertexes[last_id] = v;
-                if (!station.getTimeToNext().equals(TimeInfinity.getInstance()))
+                if (station.isHasNext())
                     v.edges.add(new Edge(last_id + 1, station.getTimeToNextInSeconds()));
-                if (!station.getTimeToPrevious().equals(TimeInfinity.getInstance()))
+                if (station.isHasPrevious())
                     v.edges.add(new Edge(last_id - 1, station.getTimeToPreviousInSecondes()));
                 vertexesMap.put(station.getId(), last_id);
                 last_id++;
