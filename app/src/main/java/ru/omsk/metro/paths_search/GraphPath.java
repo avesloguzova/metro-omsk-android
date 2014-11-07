@@ -1,5 +1,7 @@
 package ru.omsk.metro.paths_search;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 /**
@@ -7,11 +9,22 @@ import java.util.List;
  *
  */
 public class GraphPath {
+
     private int time;
+    @NotNull
     private List<Integer> ids;
 
-    public GraphPath( List<Integer> ids,int time) {
+    public GraphPath(@NotNull List<Integer> ids, int time) {
         this.time = time;
         this.ids = ids;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    @NotNull
+    public List<Integer> getIds() {
+        return ids;
     }
 }

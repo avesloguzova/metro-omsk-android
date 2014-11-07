@@ -21,21 +21,12 @@ public class WayStation extends AbstractSubwayObject {
         this.wayTime = wayTime;
     }
 
-    public WayStation(int id, int idFrom, int idTo, int wayTimeInSeconds) {
-        this(id, idFrom, idTo, new Time(wayTimeInSeconds));
-    }
-
     public int getIdFrom() {
         return idFrom;
     }
 
     public int getIdTo() {
         return idTo;
-    }
-
-    @NotNull
-    public Time getWayTime() {
-        return wayTime;
     }
 
     public int getWayTimeInSeconds() {

@@ -22,10 +22,6 @@ public class Station extends NamedSubwayObject {
         this.timeToNext = timeToNext;
     }
 
-    public Station(int id, String name, @NotNull StationCoordinate coordinate, int timeToPreviousInSeconds, int timeToNextInSeconds) {
-       this(id, name, coordinate, new Time(timeToPreviousInSeconds), new Time(timeToNextInSeconds));
-    }
-
     @NotNull
     public StationCoordinate getCoordinate() {
         return coordinate;

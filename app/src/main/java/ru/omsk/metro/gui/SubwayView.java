@@ -3,7 +3,9 @@ package ru.omsk.metro.gui;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -21,24 +23,32 @@ import ru.omsk.metro.model.Line;
 import ru.omsk.metro.model.Station;
 import ru.omsk.metro.model.SubwayMap;
 import ru.omsk.metro.paths_search.Graph;
+import ru.omsk.metro.paths_search.GraphPath;
 
 /**
  * Created by adkozlov on 06.11.14.
  */
 public class SubwayView extends View {
 
-    private static final int SELECTED_VERTEX_ALPHA = 0x48;
-    private static final int COLOR_MASK = 0xFF000000;
+    private static final int SECONDS_IN_MINUTE = 60;
+    private static final String NO_SELECTED_MESSAGE = "Выберите стартовую станцию";
+    private static final String START_SELECTED_MESSAGE = "Стартовая станция: \"%s\"\nВыберите конечную станцию";
+    private static final String PATH_MESSAGE = "Стартовая станция: \"%s\"\nКонечная станция: \"%s\"\nОбщее время в пути: %d:%d";
+
+    private static final int SELECTED_VERTEX_ALPHA = 0xFF;
+    private static final int COLOR_MASK = 0x48000000;
 
     private final int pxWidth;
     private final int pxHeight;
-    private final float radius = 10;
+    private final float radius;
 
     @NotNull
     private final Bitmap bitmap;
 
     @NotNull
-    private final Paint paint;
+    private final Paint mapPaint;
+    @NotNull
+    private final TextPaint textPaint;
     @NotNull
     private final Paint bitmapPaint;
 
@@ -46,12 +56,14 @@ public class SubwayView extends View {
     private SubwayMap map;
     @NotNull
     private Graph graph;
+    @Nullable
+    private GraphPath path;
 
     private int fromId = -1;
     private int toId = -1;
 
     @NotNull
-    private final Set<VertexCoordinate> vertices = new HashSet<VertexCoordinate>();
+    private final Set<Vertex> vertices = new HashSet<Vertex>();
 
     public SubwayView(@NotNull Context context, @NotNull AttributeSet attrs) {
         super(context, attrs);
@@ -66,13 +78,21 @@ public class SubwayView extends View {
         bitmap = Bitmap.createBitmap(pxHeight, pxWidth, Bitmap.Config.ARGB_8888);
         bitmapPaint = new Paint(Paint.DITHER_FLAG);
 
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setDither(true);
-        paint.setStrokeWidth(5f);
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
+        radius = 10;
+
+        mapPaint = new Paint();
+        mapPaint.setAntiAlias(true);
+        mapPaint.setDither(true);
+        mapPaint.setStrokeWidth(5f);
+        mapPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mapPaint.setStrokeJoin(Paint.Join.ROUND);
+        mapPaint.setStrokeCap(Paint.Cap.ROUND);
+
+        textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(Color.BLACK);
+        textPaint.setTextSize(20);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setShadowLayer(10f, 10f, 10f, Color.BLACK);
 
         setWillNotDraw(false);
 
@@ -88,16 +108,20 @@ public class SubwayView extends View {
 
                 switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    VertexCoordinate coordinate = vertexIsTouched(x, y);
+                    Vertex coordinate = vertexIsTouched(x, y);
 
                     if (coordinate != null) {
-                        if (fromId == -1) {
+                        if (fromId == -1 && toId == -1) {
                             fromId = coordinate.getId();
                         } else if (toId == -1) {
                             toId = coordinate.getId();
+
+                            path = graph.getpath(fromId, toId);
                         } else {
                             fromId = coordinate.getId();
                             toId = -1;
+
+                            path = null;
                         }
 
                         invalidate();
@@ -112,23 +136,29 @@ public class SubwayView extends View {
     }
 
     @Nullable
-    private VertexCoordinate vertexIsTouched(float x, float y) {
-        for (VertexCoordinate coordinate : vertices) {
-            if  (isInCircle(x, coordinate.getX()) && isInCircle(y, coordinate.getY())) {
-                return coordinate;
+    private Vertex vertexIsTouched(float x, float y) {
+        for (Vertex vertex : vertices) {
+            if (isInCircle(x, vertex.getX()) && isInCircle(y, vertex.getY())) {
+                return vertex;
             }
         }
 
         return null;
     }
 
-    private boolean isInCircle(float x, float center) {
-        return center - radius <= x && x <= center + radius;
+    @NotNull
+    private String findVertexNameById(int id) {
+        for (Vertex vertex : vertices) {
+            if (vertex.getId() == id) {
+                return vertex.getName();
+            }
+        }
+
+        throw new RuntimeException("no such station found");
     }
 
-    @NotNull
-    public SubwayMap getMap() {
-        return map;
+    private boolean isInCircle(float x, float center) {
+        return center - radius <= x && x <= center + radius;
     }
 
     public void setMap(@NotNull SubwayMap map) {
@@ -144,39 +174,63 @@ public class SubwayView extends View {
         }
 
         for (Line line : map.getLines()) {
-            paint.setColor(line.getColor() | COLOR_MASK);
+            mapPaint.setColor(line.getColor() | COLOR_MASK);
 
             Iterator<Station> iterator = line.getStations().iterator();
 
-            VertexCoordinate current = nextCoordinate(iterator);
-            drawCircle(canvas, current);
+            Vertex current = nextCoordinate(iterator);
+            drawVertex(canvas, current);
 
             while (iterator.hasNext()) {
-                VertexCoordinate previous = current;
+                Vertex previous = current;
 
                 current = nextCoordinate(iterator);
-                drawCircle(canvas, current);
+                drawVertex(canvas, current);
 
-                canvas.drawLine(previous.getX(), previous.getY(), current.getX(), current.getY(), paint);
+                canvas.drawLine(previous.getX(), previous.getY(), current.getX(), current.getY(), mapPaint);
             }
         }
     }
 
-    private void drawCircle(@NotNull Canvas canvas, @NotNull VertexCoordinate current) {
-        int oldAlpha = paint.getAlpha();
-        if (current.getId() == fromId || current.getId() == toId) {
-            paint.setAlpha(SELECTED_VERTEX_ALPHA);
+    private void drawTitle(@NotNull Canvas canvas) {
+        String title = null;
+        if (fromId == -1 && toId == -1) {
+            title = NO_SELECTED_MESSAGE;
+        } else if (toId == -1) {
+            title = String.format(START_SELECTED_MESSAGE, findVertexNameById(fromId));
+        } else {
+            title = String.format(PATH_MESSAGE,
+                    findVertexNameById(fromId), findVertexNameById(toId),
+                    path.getTime() / SECONDS_IN_MINUTE, path.getTime() % SECONDS_IN_MINUTE);
         }
 
-        canvas.drawCircle(current.getX(), current.getY(), radius, paint);
-        paint.setAlpha(oldAlpha);
+        int x = 0;
+        int y = 50;
+        for (String line : title.split("\n")) {
+            canvas.drawText(line, x, y, textPaint);
+            y += textPaint.ascent() + textPaint.descent();
+        }
+    }
+
+    private void drawVertex(@NotNull Canvas canvas, @NotNull Vertex current) {
+        int oldAlpha = mapPaint.getAlpha();
+        if (current.getId() == fromId || current.getId() == toId) {
+            mapPaint.setAlpha(SELECTED_VERTEX_ALPHA);
+        }
+
+        canvas.drawCircle(current.getX(), current.getY(), radius, mapPaint);
+        mapPaint.setAlpha(oldAlpha);
+
+        canvas.drawText(current.getName(), current.getX(), current.getY(), textPaint);
     }
 
     @NotNull
-    private VertexCoordinate nextCoordinate(Iterator<Station> iterator) {
+    private Vertex nextCoordinate(Iterator<Station> iterator) {
         Station station = iterator.next();
 
-        VertexCoordinate result =  VertexCoordinate.createFromStationCoordinate(station.getId(), station.getCoordinate(),
+        Vertex result = Vertex.createFromStationCoordinate(station.getId(),
+                station.getName(),
+                station.getCoordinate(),
                 pxWidth, pxHeight);
         vertices.add(result);
 
@@ -186,6 +240,7 @@ public class SubwayView extends View {
     @Override
     protected void onDraw(@NotNull Canvas canvas) {
         drawMap(canvas);
+        drawTitle(canvas);
         canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
     }
 

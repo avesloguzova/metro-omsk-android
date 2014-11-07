@@ -49,7 +49,6 @@ public class Graph {
 
     @NotNull
     public GraphPath getpath(int fromId, int toId) {
-
         int[] d = new int[vertexes.length];
         for (int i = 0; i < d.length; i++) {
             d[i] = Integer.MAX_VALUE;
