@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -22,6 +23,7 @@ import java.util.Set;
 import ru.omsk.metro.model.Line;
 import ru.omsk.metro.model.Station;
 import ru.omsk.metro.model.SubwayMap;
+import ru.omsk.metro.model.WayStation;
 import ru.omsk.metro.paths_search.Graph;
 import ru.omsk.metro.paths_search.GraphPath;
 
@@ -33,9 +35,10 @@ public class SubwayView extends View {
     private static final int SECONDS_IN_MINUTE = 60;
     private static final String NO_SELECTED_MESSAGE = "Выберите стартовую станцию";
     private static final String START_SELECTED_MESSAGE = "Стартовая станция: \"%s\"\nВыберите конечную станцию";
-    private static final String PATH_MESSAGE = "Стартовая станция: \"%s\"\nКонечная станция: \"%s\"\nОбщее время в пути: %d:%d";
+    private static final String PATH_MESSAGE = "Стартовая станция: \"%s\"\nКонечная станция: \"%s\"\nОбщее время в пути: %d:%d минут";
+    private static final String NO_PATH_MESSAGE = "Стартовая станция: \"%s\"\nКонечная станция: \"%s\"\nНет сообщения между станциями";
 
-    private static final int SELECTED_VERTEX_ALPHA = 0xFF;
+    private static final int PATH_ALPHA = 0xFF;
     private static final int COLOR_MASK = 0x48000000;
 
     private final int pxWidth;
@@ -147,14 +150,19 @@ public class SubwayView extends View {
     }
 
     @NotNull
-    private String findVertexNameById(int id) {
+    private Vertex findVertexById(int id) {
         for (Vertex vertex : vertices) {
             if (vertex.getId() == id) {
-                return vertex.getName();
+                return vertex;
             }
         }
 
         throw new RuntimeException("no such station found");
+    }
+
+    @NotNull
+    private String findVertexNameById(int id) {
+        return findVertexById(id).getName();
     }
 
     private boolean isInCircle(float x, float center) {
@@ -187,9 +195,41 @@ public class SubwayView extends View {
                 current = nextCoordinate(iterator);
                 drawVertex(canvas, current);
 
+                int oldAlpha = setAlpha(current, previous);
                 canvas.drawLine(previous.getX(), previous.getY(), current.getX(), current.getY(), mapPaint);
+                mapPaint.setAlpha(oldAlpha);
             }
         }
+
+        for (WayStation wayStation : map.getWayStations()) {
+            mapPaint.setColor(Color.BLACK);
+
+            Paint.Style oldStyle = mapPaint.getStyle();
+            mapPaint.setStyle(Paint.Style.STROKE);
+            mapPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+
+            Vertex from = findVertexById(wayStation.getIdFrom());
+            Vertex to = findVertexById(wayStation.getIdTo());
+
+            int oldAlpha = setAlpha(to, from);
+
+            canvas.drawLine(from.getX(), from.getY(), to.getX(), to.getY(), mapPaint);
+            mapPaint.setStyle(oldStyle);
+            mapPaint.setPathEffect(null);
+            mapPaint.setAlpha(oldAlpha);
+        }
+    }
+
+    private int setAlpha(@NotNull Vertex current, @NotNull Vertex previous) {
+        int result = mapPaint.getAlpha();
+
+        if (path != null) {
+            if (path.getIds().contains(current.getId()) && path.getIds().contains(previous.getId())) {
+                mapPaint.setAlpha(PATH_ALPHA);
+            }
+        }
+
+        return result;
     }
 
     private void drawTitle(@NotNull Canvas canvas) {
@@ -199,12 +239,19 @@ public class SubwayView extends View {
         } else if (toId == -1) {
             title = String.format(START_SELECTED_MESSAGE, findVertexNameById(fromId));
         } else {
-            title = String.format(PATH_MESSAGE,
-                    findVertexNameById(fromId), findVertexNameById(toId),
-                    path.getTime() / SECONDS_IN_MINUTE, path.getTime() % SECONDS_IN_MINUTE);
+            String from = findVertexNameById(fromId);
+            String to = findVertexNameById(toId);
+            int time = path.getTime();
+
+            if (time != Integer.MAX_VALUE) {
+                title = String.format(PATH_MESSAGE, from, to,
+                        time / SECONDS_IN_MINUTE, time % SECONDS_IN_MINUTE);
+            } else {
+                title = String.format(NO_PATH_MESSAGE, from, to);
+            }
         }
 
-        int x = 0;
+        int x = 100;
         int y = 50;
         for (String line : title.split("\n")) {
             canvas.drawText(line, x, y, textPaint);
@@ -215,7 +262,7 @@ public class SubwayView extends View {
     private void drawVertex(@NotNull Canvas canvas, @NotNull Vertex current) {
         int oldAlpha = mapPaint.getAlpha();
         if (current.getId() == fromId || current.getId() == toId) {
-            mapPaint.setAlpha(SELECTED_VERTEX_ALPHA);
+            mapPaint.setAlpha(PATH_ALPHA);
         }
 
         canvas.drawCircle(current.getX(), current.getY(), radius, mapPaint);
