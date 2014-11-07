@@ -37,35 +37,6 @@ public class LoadService {
     }
 
     @NotNull
-    public URI getURI() throws LoadServiceException {
-        try {
-            return new URL(
-                    context.getString(R.string.API_PROTOCOL),
-                    context.getString(R.string.API_HOST),
-                    Integer.valueOf(context.getString(R.string.API_PORT)),
-                    context.getString(R.string.API_PATH)).toURI();
-        } catch (MalformedURLException e) {
-            throw new LoadServiceException(e);
-        } catch (URISyntaxException e) {
-            throw new LoadServiceException(e);
-        }
-    }
-
-    @NotNull
-    public LoadResult load() throws LoadServiceException {
-        HttpGet get = new HttpGet(getURI());
-        HttpResponse response = null;
-
-        try {
-            response = client.execute(get);
-        } catch (IOException e) {
-            throw new LoadServiceException(e);
-        }
-
-        return new LoadResult(getResultFromJSON(readJSONFromResponse(response)));
-    }
-
-    @NotNull
     protected static JSONObject getResultFromJSON(@NotNull String json) throws LoadServiceException {
         try {
             JSONParser parser = new JSONParser();
@@ -122,5 +93,54 @@ public class LoadService {
                 }
             }
         }
+    }
+
+    @NotNull
+    public URI getURI(String path) throws LoadServiceException {
+        try {
+            return new URL(
+                    context.getString(R.string.API_PROTOCOL),
+                    context.getString(R.string.API_HOST),
+                    Integer.valueOf(context.getString(R.string.API_PORT)), path
+            ).toURI();
+        } catch (MalformedURLException e) {
+            throw new LoadServiceException(e);
+        } catch (URISyntaxException e) {
+            throw new LoadServiceException(e);
+        }
+    }
+
+    @NotNull
+    public LoadResult load(int city_id) throws LoadServiceException {
+        HttpGet get = new HttpGet(getURI(String.format(context.getString(R.string.API_PATH_MODEL), city_id)));
+        HttpResponse response = null;
+
+        try {
+            response = client.execute(get);
+        } catch (IOException e) {
+            throw new LoadServiceException(e);
+        }
+
+        return new LoadResult(getResultFromJSON(readJSONFromResponse(response)));
+    }
+
+    /**
+     * Load JSON contain information about available cities
+     *
+     * @return LoadResult
+     * @throws LoadServiceException
+     */
+    @NotNull
+    public LoadResult loadCities() throws LoadServiceException {
+        HttpGet get = new HttpGet(getURI(context.getString(R.string.API_PATH_CITY)));
+        HttpResponse response = null;
+
+        try {
+            response = client.execute(get);
+        } catch (IOException e) {
+            throw new LoadServiceException(e);
+        }
+
+        return new LoadResult(getResultFromJSON(readJSONFromResponse(response)));
     }
 }

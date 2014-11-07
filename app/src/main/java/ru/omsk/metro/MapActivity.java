@@ -2,22 +2,30 @@ package ru.omsk.metro;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+
 import org.jetbrains.annotations.NotNull;
+
 
 import ru.omsk.metro.gui.SubwayView;
 import ru.omsk.metro.model.SubwayMap;
+
 import ru.omsk.metro.net.LoadResult;
 import ru.omsk.metro.net.LoadServiceException;
 import ru.omsk.metro.net.MockLoadService;
 
+import ru.omsk.metro.net.MockLoadService;
+
+
 public class MapActivity extends Activity {
-   
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +50,8 @@ public class MapActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, RESULT_OK);
         }
 
         return super.onOptionsItemSelected(item);
@@ -51,33 +60,44 @@ public class MapActivity extends Activity {
     private void processLoadResult(@NotNull LoadResult result) {
         if (result.isSucceeded()) {
             SubwayView view = (SubwayView) findViewById(R.id.subwayView);
-
             view.setMap(SubwayMap.fromJSON(result.getJSON()));
         }
     }
+
     public void loadDataProcess() {
         //TODO progress bar
+        SharedPreferences preferences = getSharedPreferences(getString(R.string.PREF_NAME), MODE_PRIVATE);
+        new LoadServiceGateway(this, preferences.getInt(getString(R.string.PREF_KEY_CITY), 1)).execute();
+    }
 
-        new LoadServiceGateway(this).execute();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) {
+            return;
+        }
+        loadDataProcess();
     }
 
     private class LoadServiceGateway extends AsyncTask<Void, Void, LoadResult> {
 
         @NotNull
         private final Context context;
+        private final int id;
 
-        private LoadServiceGateway(@NotNull Context context) {
+        private LoadServiceGateway(@NotNull Context context, int id) {
             this.context = context;
+            this.id = id;
         }
 
         @Override
         protected LoadResult doInBackground(Void... voids) {
             try {
-                return new MockLoadService(context).load();
+                return new MockLoadService(context).load(id);
             } catch (LoadServiceException e) {
                 return new LoadResult(e.getMessage());
             }
         }
+
         @Override
         protected void onPostExecute(@NotNull LoadResult result) {
             if (!result.isSucceeded()) {
