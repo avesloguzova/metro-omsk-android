@@ -66,7 +66,8 @@ public class Graph {
             if (d[v] == Integer.MAX_VALUE)
                 break;
             used[v] = true;
-
+            if (v == end)
+                break;
             for (Edge e : vertexes[v].edges) {
                 int to = e.idTo;
                 int len = e.weight;
